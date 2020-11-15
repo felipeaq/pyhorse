@@ -42,6 +42,7 @@ class Sensors:
         self.ref["pitch"] = self.pitch
         self.ref["roll"] = self.roll
         self.ref["yaw"] = self.yaw
+        self.rtc_start = 0
         for i in range(Sensors.AXIS):
             self.a.append(deque(maxlen=maxlen))
             self.g.append(deque(maxlen=maxlen))
@@ -63,7 +64,10 @@ class Sensors:
         return longInt
 
     def append(self, timeRtc,  accLocal,  gyroLocal, magLocal):
-        self.rtc.append(timeRtc/10)
+
+        if not self.rtc:
+            self.rtc_start = timeRtc
+        self.rtc.append((timeRtc-self.rtc_start)/10)
 
         for i in range(Sensors.AXIS):
             self.a[i].append(accLocal[i])

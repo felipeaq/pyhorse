@@ -4,6 +4,7 @@ import traceback
 import sys
 import numpy as np
 import time
+from resources import *
 
 
 class ReadRoutine(object):
@@ -12,30 +13,39 @@ class ReadRoutine(object):
     def __new__(cls):
 
         if ReadRoutine.__instance is None:
-            total_s = 6
             ReadRoutine.__instance = object.__new__(cls)
-            ReadRoutine.__instance.sensors = Sensors(Sensors.MAX_X)
-            ReadRoutine.__instance.cycle_past = 0
-            ReadRoutine.__instance.n_s = 6
-            ReadRoutine.__instance.active_sensors = [False]*total_s
-            ReadRoutine.__instance.sensor_pos = []
-            ReadRoutine.__instance.FRTC = 32768.0
-            ReadRoutine.__instance.sock = None
+            ReadRoutine.__instance.readers = []
 
         return ReadRoutine.__instance
+
+    def add_connection(self, dest):
+        reader = Reader()
+        self.readers.append(reader)
+        reader.connect(dest)
+        return reader
+
+    def close_at(self, i):
+        self.readers[i].close()
+
+    def read_values_at(self, i):
+        self.readers[i].read_values()
+
+
+class Reader:
+    def __init__(self):
+        self.sensors = Sensors(Sensors.MAX_X)
+        self.sock = None
 
     def read_values(self):
 
         data = self.sock.recv(Sensors.WINDOWS_SIZE)
         while (len(data) != Sensors.WINDOWS_SIZE):
             data += self.sock.recv(Sensors.WINDOWS_SIZE-len(data))
-        start = time.time()
         self.sensors.appendFromWindow(data)
 
     def connect(self, dest):
         # print("connecting...")
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
         self.sock.connect(dest)
 
     def start(self):
@@ -47,7 +57,7 @@ class ReadRoutine(object):
 
 def main():
     print(1)
-    HOST = '192.168.1.108'     # Endereco IP do Servidor
+    HOST = Resources().loadip()     # Endereco IP do Servidor
     PORT = 8001            # Porta que o Servidor esta
     ReadRoutine().connect((HOST, PORT))
     ReadRoutine().start()
@@ -56,7 +66,7 @@ def main():
         try:
 
             ReadRoutine().read_values()
-            print(list(np.diff(ReadRoutine().sensors.rtc)))
+            print(ReadRoutine().sensors.rtc[-1])
 
         except Exception as e:
             exc_type, exc_value, exc_traceback = sys.exc_info()

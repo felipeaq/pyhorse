@@ -56,14 +56,14 @@ class Ui_bluetooth_devices_window(object):
         self.gridLayout.addWidget(self.ipbox, 2, 0, 1, 1)
         #list_devices = self.mountComboBox()
 
-        self.ipbox.setText(Resources().loadip())
+        # self.ipbox.setText(Resources().loadip())
         # Bluetooth configurations
         blue = WifiConnection()
 
         def f(x):
-            Resources().saveip(self.ipbox.text())
+
             return blue.wifiConnect(
-                [], self.ipbox.text(), bluetooth_devices_window, home_window, screen_size)
+                Resources().loadip(), bluetooth_devices_window, home_window, screen_size)
         self.submit_devices.clicked.connect(f)
 
         # Horizontal Grid

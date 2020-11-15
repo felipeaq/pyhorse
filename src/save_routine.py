@@ -13,8 +13,6 @@ class SaveRoutine:
             SaveRoutine.__instance.PATH = "../data/"
             SaveRoutine.__instance.__saving = False
             SaveRoutine.__instance.__start = False
-            # self.__window=window
-            # self.__count=0
             SaveRoutine.__instance.__current_file = ""
             SaveRoutine.__instance.__comment = ""
         return SaveRoutine.__instance

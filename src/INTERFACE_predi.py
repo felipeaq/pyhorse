@@ -74,7 +74,8 @@ class Ui_MainWindow(object):
                 0.01, [(self._update_canvas, (), {})])
 
         for i in range(3):
-            pass
+            self.list__dynamic_ax[i].set_ylim(
+                [-Sensors.MAX_Y_GYRO, Sensors.MAX_Y_GYRO])
         for i in range(3, 6):
             self.list__dynamic_ax[i].set_ylim(
                 [-Sensors.MAX_Y_ACC, Sensors.MAX_Y_ACC])
@@ -320,59 +321,43 @@ class Ui_MainWindow(object):
         for i in range(6):
             self.list__dynamic_ax[i].clear()
 
-        t1, xfft = ReadRoutine().sensors.getXY("gyroRad0")
-        t2, yfft = ReadRoutine().sensors.getXY("gyroRad1")
-        t3, zfft = ReadRoutine().sensors.getXY("gyroRad2")
-        t4, x = ReadRoutine().sensors.getXY("accGravity0")
-        t5, y = ReadRoutine().sensors.getXY("accGravity1")
-        t6, z = ReadRoutine().sensors.getXY("accGravity2")
-        t7, magx = ReadRoutine().sensors.getXY("magNorm0")
-        t8, magy = ReadRoutine().sensors.getXY("magNorm1")
-        t9, magz = ReadRoutine().sensors.getXY("magNorm2")
-        t10, pitch = ReadRoutine().sensors.getXY("pitch")
-        t11, roll = ReadRoutine().sensors.getXY("roll")
-        t12, yaw = ReadRoutine().sensors.getXY("yaw")
+        for reader in ReadRoutine().readers:
+            t1, gx = reader.sensors.getXY("gyroRad0")
+            t2, gy = reader.sensors.getXY("gyroRad1")
+            t3, gz = reader.sensors.getXY("gyroRad2")
+            t4, ax = reader.sensors.getXY("accGravity0")
+            t5, ay = reader.sensors.getXY("accGravity1")
+            t6, az = reader.sensors.getXY("accGravity2")
 
-        # print(np.diff(t6))
-        # print("mean={}, std={}".format(np.mean(np.diff(t6)), np.std(np.diff(t6))))
-        if len(t4) != 0:
-            if t4[-1] >= self.gap[1]:
-                self.gap[0] = int(ReadRoutine().sensors.rtc[0])
-                self.gap[1] = int(ReadRoutine().sensors.rtc[-1])
+            # print(np.diff(t6))
+            # print("mean={}, std={}".format(np.mean(np.diff(t6)), np.std(np.diff(t6))))
+            if len(t4) != 0:
+                if t4[-1] >= self.gap[1]:
+                    for i in range(3):
+                        self.list__dynamic_ax[i].set_ylim(
+                            [-Sensors.MAX_Y_GYRO, Sensors.MAX_Y_GYRO])
+                    for i in range(3, 6):
+                        self.list__dynamic_ax[i].set_ylim(
+                            [-Sensors.MAX_Y_ACC, Sensors.MAX_Y_ACC])
+                    self.gap[0] = int(ReadRoutine().readers[0].sensors.rtc[0])
+                    self.gap[1] = int(ReadRoutine().readers[0].sensors.rtc[-1])
 
-        self.list__dynamic_ax[0].plot(t1, xfft)
-        self.list__dynamic_ax[0].set_ylabel('X-FFT')
-        self.list__dynamic_ax[0].plot(t2, yfft)
-        self.list__dynamic_ax[0].set_ylabel('Y-FFT')
-        self.list__dynamic_ax[0].plot(t3, zfft)
-        self.list__dynamic_ax[0].set_ylabel('Z-FFT')
+            self.list__dynamic_ax[0].plot(t1, gx)
+            self.list__dynamic_ax[0].set_ylabel('X-gyro')
+            self.list__dynamic_ax[1].plot(t2, gy)
+            self.list__dynamic_ax[1].set_ylabel('Y-gyro')
+            self.list__dynamic_ax[2].plot(t3, gz)
+            self.list__dynamic_ax[2].set_ylabel('Z-gyro')
 
-        self.list__dynamic_ax[1].plot(t4, x)
-        self.list__dynamic_ax[1].set_ylabel('X-axis')
-        self.list__dynamic_ax[1].plot(t5, y)
-        self.list__dynamic_ax[1].set_ylabel('Y-axis')
-        self.list__dynamic_ax[1].plot(t6, z)
-        self.list__dynamic_ax[1].set_ylabel('Z-axis')
+            self.list__dynamic_ax[3].plot(t4, ax)
+            self.list__dynamic_ax[3].set_ylabel('X-acc')
+            self.list__dynamic_ax[4].plot(t5, ay)
+            self.list__dynamic_ax[4].set_ylabel('Y-acc')
+            self.list__dynamic_ax[5].plot(t6, az)
+            self.list__dynamic_ax[5].set_ylabel('Z-acc')
 
-        self.list__dynamic_ax[2].plot(t7, magx)
-        self.list__dynamic_ax[2].set_ylabel('X-axis')
-        self.list__dynamic_ax[2].plot(t8, magy)
-        self.list__dynamic_ax[2].set_ylabel('Y-axis')
-        self.list__dynamic_ax[2].plot(t9, magz)
-        self.list__dynamic_ax[2].set_ylabel('Z-axis')
-
-        self.list__dynamic_ax[3].plot(t10, pitch)
-        self.list__dynamic_ax[3].set_ylabel('X-axis')
-        self.list__dynamic_ax[4].plot(t11, roll)
-        self.list__dynamic_ax[4].set_ylabel('Y-axis')
-        self.list__dynamic_ax[5].plot(t12, yaw)
-        self.list__dynamic_ax[5].set_ylabel('Z-axis')
-
-        list_ylim = [Sensors.MAX_Y_GYRO] + \
-            [Sensors.MAX_Y_ACC]+[Sensors.MAX_Y_MAG]+[180]*3
         for i in range(6):
             self.list__dynamic_ax[i].set_xlim([self.gap[0], self.gap[1]])
-            self.list__dynamic_ax[i].set_ylim([-list_ylim[i], list_ylim[i]])
             self.list__dynamic_ax[i].figure.canvas.draw()
 
         self.firstChange = False
@@ -396,13 +381,13 @@ class Ui_MainWindow(object):
         self.prob_unbalance_value.setStyleSheet("background-color: rgb(0, 255, 0);\n"
                                                 "color: rgb(0, 0, 0);")
         self.prob_unbalance_value.setText(
-            str(round(ReadRoutine().sensors.getAxis("y"), 1))+"º")
+            str(round(ReadRoutine().readers[0].sensors.getAxis("y"), 1))+"º")
 
     def probFriction(self):
         self.prob_friction_value.setStyleSheet("background-color: rgb(0, 255, 0);\n"
                                                "color: rgb(0, 0, 0);")
         self.prob_friction_value.setText(
-            str(round(ReadRoutine().sensors.getAxis("x"), 1))+"º")
+            str(round(ReadRoutine().readers[0].sensors.getAxis("x"), 1))+"º")
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate

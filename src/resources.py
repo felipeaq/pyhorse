@@ -13,7 +13,7 @@ class Resources:
 
     def loadip(self):
         f = open(Resources.__instance.ipfile, "r")
-        ip = f.readline()
+        ip = f.read().split("\n")
         f.close()
         return ip
 

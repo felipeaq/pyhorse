@@ -20,7 +20,7 @@ class Status(Enum):
 
 
 class WifiConnection:
-    def __init__(self, name="ACELEROMETROS", port=0x1001):
+    def __init__(self, name="ACELEROMETROS", port=8001):
         self.name = name
         self.sock = None
         self.port = port
@@ -32,42 +32,58 @@ class WifiConnection:
 
     def __connect(self, addr):
         try:
-            ReadRoutine().connect(addr)
+            reader = ReadRoutine().add_connection(addr)
         except:
             print("impossible to connect")
+            return
         try:
-            ReadRoutine().start()
+            reader.start()
             self.status = Status.WORKING
         except:
+            print("impossible to send")
             self.status = Status.FINISHED
 
         while True:
             try:
 
-                ReadRoutine().read_values()
-                SaveRoutine().save_routine()
+                reader.read_values()
+                # reader.save_routine()
 
             except KeyboardInterrupt:
                 # print ("finalizando conexão...")
-                ReadRoutine().close()
+                reader.close()
                 self.status = Status.FINISHED
                 return 1
 
         self.sock.close()
         return 0
 
-    def wifiConnect(self, list_devices, ip, bluetooth_devices_window, home_window, screen_size):
+    def wifiConnect(self, ips, bluetooth_devices_window, home_window, screen_size):
 
-        addr = (ip, 8001)
+        for ip in ips:
 
-        self.t = threading.Thread(target=self.__connect, args=(addr,))
-        self.t.start()
+            addr = (ip, 8001)
+            self.t = threading.Thread(target=self.__connect, args=(addr,))
+            self.t.start()
+
         self.close(bluetooth_devices_window)
 
         self.close(home_window)
-
+#
         self.window = QtWidgets.QMainWindow()
         choose = ChooseAppWindow()
         choose.setupUi(self.window, screen_size)
         self.window.show()
         return 0
+
+
+if __name__ == "__main__":
+    w = WifiConnection()
+    print("a")
+    w.wifiConnect(["192.168.0.116", "192.168.0.117"], None, None, None)
+    print("b")
+    time.sleep(1)
+    print("c")
+    while True:
+        print(ReadRoutine().readers[0].sensors.rtc[-1],
+              ReadRoutine().readers[1].sensors.rtc[-1])
