@@ -115,11 +115,7 @@ class Ob3D:
 
 
 def connect(addr):
-    # print (addr)
-    # Create the client socket
-    # self.sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-    # self.sock.connect((addr, self.port))
-    # self.sock.settimeout(10)
+
     try:
         ReadRoutine().connect(addr)
     except:
