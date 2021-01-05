@@ -92,7 +92,7 @@ class Ui_MainWindow(object):
             choose.setupUi(self.window,  self.screen_size)
             self.window.show()
             return blue.wifiConnect(
-                Resources().loadip(), MainWindow, self.screen_size)
+                Resources().loadip())
 
         self.blue_btn.clicked.connect(f)
         MainWindow.setCentralWidget(self.centralwidget)

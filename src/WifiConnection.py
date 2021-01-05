@@ -55,7 +55,7 @@ class WifiConnection:
         self.sock.close()
         return 0
 
-    def wifiConnect(self, ips, home_window, screen_size):
+    def wifiConnect(self, ips):
 
         for ip in ips:
 
@@ -69,10 +69,9 @@ class WifiConnection:
 if __name__ == "__main__":
     w = WifiConnection()
     print("a")
-    w.wifiConnect(["192.168.0.116", "192.168.0.117"], None, None, None)
+    w.wifiConnect(["192.168.0.101"])
     print("b")
     time.sleep(1)
     print("c")
     while True:
-        print(ReadRoutine().readers[0].sensors.rtc[-1],
-              ReadRoutine().readers[1].sensors.rtc[-1])
+        print(ReadRoutine().readers[0].sensors.a)

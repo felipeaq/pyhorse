@@ -67,7 +67,7 @@ class Sensors:
 
         if not self.rtc:
             self.rtc_start = timeRtc
-        self.rtc.append((timeRtc-self.rtc_start)/10)
+        self.rtc.append((timeRtc-self.rtc_start)/10000)
 
         for i in range(Sensors.AXIS):
             self.a[i].append(accLocal[i])
